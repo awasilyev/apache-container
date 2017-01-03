@@ -1,15 +1,30 @@
 ---
-- name: Install Packages.
+- name: Install Packages
   package: name={{item}} state=installed
   with_items:
   - httpd
   - mod_ssl
   - rsync
 
+- name: Install dumb init
+  get_url:
+    url: https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64
+    dest: /usr/bin/dumb-init
+    owner: root
+    group: root
+    mode: 0775
+
+- name: Update the apache user
+  user:
+    name: apache
+    uid: 1000
+    group: root
+    createhome: no
+
 - name: Add entrypoint script
   template:
-   src: entrypoint.sh
-   dest: /entrypoint.sh
+   src: entrypoint.sh.j2
+   dest: /usr/bin/entrypoint.sh
    owner: root
    group: root
    mode: 0775
@@ -27,14 +42,19 @@
     - ssl.conf
     - vhost.inc
 
-- synchronize:
-    src: "./site/"
-    dest: "/var/www/html/"
-
-- file: name="{{item}}" state=directory owner=apache
+- name: Set directory ownership 
+  file: name="{{item}}" state=directory owner=apache group=root mode=0775
   with_items:
   - /run/httpd
   - /etc/httpd/ssl
+  - /var/www/html
+
+- name: Put static assets
+  synchronize:
+    src: "{{ item }}/"
+    dest: "/var/www/html"
+  with_items: "{{ APACHE_ASSET_PATHS }}"
+  remote_user: apache
 
 - name: Cleanup
   shell: yum clean all -y

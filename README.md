@@ -1,10 +1,9 @@
 Apache
-=========
+======
 
-[![Build Status](https://travis-ci.org/awasilyev/apache-container.svg?branch=master)](https://travis-ci.org/awasilyev/memcached-container)
+[![Build Status](https://travis-ci.org/awasilyev/apache-container.svg?branch=master)](https://travis-ci.org/awasilyev/ansible-container)
 
-Use this role to add a apache httpd service to your Ansible Container project. See Role Variables below for how to configure ssl and additional parameters. 
-It will listen on 80 and 443 ports (if ssl enabled).
+Use this role to add an apache httpd service to your [Ansible Container](https://github.com/ansible/ansible-container) project. See Role Variables below for how to configure SSL and additional parameters. 
 
 Run the following commands to install the service:
 
@@ -16,16 +15,38 @@ $ cd myproject
 $ ansible-container install awasilyev.apache-container-role 
 ```
 
+Post Install
+------------
+
+The project's `container.yml` will be updated to include an *apache* service with the following port mappings, which you may wish to adjust:
+
+```
+ports:
+  - 80:8080
+  - 443:8443
+```
+
+The document root for the server is */var/www/html*. During image build, the list of paths defined using APACHE_ASSET_PATHS will be copied to the document root. During application development you will likely want to map a host path to the document root, which can be done by adding a `dev_overrides` section to the service:
+
+```
+dev_overrides:
+   volumes:
+     - ${PWD}/static:/var/www/html
+```
+
 Role Variables
 --------------
 
-Set the following environment variables in container.yml:
+The following variables are defined in [defaults/main.yml](./defaults/main.yml), and can be set in `main.yml`:
+
+APACHE_ASSET_PATHS
+> List of paths containing static assets to be copied to the server document root */var/www/html* (default ['./files']).
 
 APACHE_HOSTNAME
-> apache hostname (default localhost)
+> Set the hostname (default localhost).
 
 APACHE_SSL
-> use ssl. If /etc/httpd/ssl/cert.crt and /etc/httpd/ssl/cert.key files exists - they will be used, if not - self-signed certificate will be generated  (0 - no / 1 - yes, default: 0)
+> Set to True to enable SSL (defaults to False). If /etc/httpd/ssl/cert.crt and /etc/httpd/ssl/cert.key files exists, they will be used. If not, self-signed certificate are generated when the container starts.
 
 APACHE_SSL_PROTOCOLS
 > SSL protocol (default "All -SSLv2 -SSLv3")
@@ -43,11 +64,12 @@ APACHE_DEFAULT_CHARSET
 > Apache default charset (default "UTF-8")
 
 APACHE_EXTRA_PARAMETERS
-> list of additional parameters for vhost. for example 
+> List of additional parameters for vhost (default []), for example:
 ```
-APACHE_EXTRA_PARAMETERS: ['RewriteCond %{HTTP_HOST} !^www\. [NC]','RewriteRule ^(.*)$ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]']
+APACHE_EXTRA_PARAMETERS:
+  - 'RewriteCond %{HTTP_HOST} !^www\. [NC]'
+  - 'RewriteRule ^(.*)$ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]'
 ```
-(default [])
 
 Dependencies
 ------------

@@ -12,16 +12,15 @@
       - ./ansible
       - build.out
       - playbook.out
-      - symfony
 
   - name: Init the ansible directory 
     command: ansible-container init
     
   - name: Install this role with latest commit   
-    shell: "ansible-container install git+https://github.com/awasilyev/memcached-container.git,$(git rev-parse HEAD) | tee ./build.out"
+    shell: "ansible-container install git+https://github.com/chouseknecht/apache-container.git,$(git rev-parse HEAD) | tee ./build.out"
       
   - name: Build the project
-    shell: ansible-container --from-scratch --debug build 2>&1 | tee -a ./build.out
+    shell: ansible-container --debug build --from-scratch 2>&1 | tee -a ./build.out
     register: output
     ignore_errors: yes
 

@@ -10,4 +10,4 @@ fi
 
 docker ps
 
-docker logs ansible_memcached_1
+docker logs ansible_apache_1

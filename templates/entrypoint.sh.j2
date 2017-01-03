@@ -7,4 +7,4 @@ if [ ! -r /etc/httpd/ssl/cert.crt ]; then
   openssl req -subj '/CN={{APACHE_HOSTNAME}}/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 3650 -sha256  -nodes -x509 -keyout cert.key -out cert.crt
 fi
 {% endif %}
-exec httpd -DFOREGROUND
+exec "$@"
