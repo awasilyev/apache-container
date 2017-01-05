@@ -12,7 +12,7 @@ Run the following commands to install the service:
 $ cd myproject
 
 # Install the service
-$ ansible-container install awasilyev.apache-container-role 
+$ ansible-container install awasilyev.apache-container
 ```
 
 Post Install
